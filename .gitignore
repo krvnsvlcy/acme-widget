@@ -1,0 +1,17 @@
+node_modules/
+dist/
+.vite/
+coverage/
+
+vendor/
+.phpunit.cache/
+.phpunit.result.cache
+
+.env
+.env.*
+!.env.example
+
+*.log
+.DS_Store
+.idea/
+.vscode/

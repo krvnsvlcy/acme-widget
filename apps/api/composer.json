@@ -1,0 +1,10 @@
+{
+    "name": "acme/widget-api",
+    "description": "Acme Widget Co basket API",
+    "type": "project",
+    "require": { "php": ">=8.3" },
+    "require-dev": { "phpunit/phpunit": "^11.0" },
+    "autoload": { "psr-4": { "Acme\\Widget\\": "src/" } },
+    "autoload-dev": { "psr-4": { "Acme\\Widget\\Tests\\": "tests/" } },
+    "scripts": { "test": "phpunit" }
+}
