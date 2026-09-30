@@ -1,60 +1,31 @@
+@import '@fontsource-variable/inter-tight';
 @import 'tailwindcss';
 
 /*
- * Semantic colours, used as e.g. `bg-surface`, `text-muted`, `border-line`.
- * Dark mode overrides the same variables, so components need no `dark:` variants.
+ * Monochrome poster style: near-black paper, off-white ink, thin rules.
+ * Semantic colours are used as e.g. `bg-surface`, `text-muted`, `border-line`.
  */
 @theme {
-  --color-page: #f6f5f2;
-  --color-surface: #ffffff;
-  --color-ink: #1c1b1f;
-  --color-muted: #6b6873;
-  --color-line: #e4e2dd;
-  --color-accent: #2f5bd3;
-  --color-accent-hover: #2449b3;
-  --color-on-accent: #ffffff;
-  --color-positive: #1d7a46;
-  --color-danger: #b3261e;
-  --color-danger-bg: #fdecea;
+  --font-sans: 'Inter Tight Variable', system-ui, sans-serif;
 
-  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.04), 0 4px 12px rgb(0 0 0 / 0.04);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-page: #141418;
-    --color-surface: #1d1d23;
-    --color-ink: #ececf0;
-    --color-muted: #9a98a3;
-    --color-line: #2e2e36;
-    --color-accent: #6f93f5;
-    --color-accent-hover: #8aa8f7;
-    --color-on-accent: #0e1320;
-    --color-positive: #5fcf8e;
-    --color-danger: #f2b8b5;
-    --color-danger-bg: #3a1d1b;
-    --shadow-card: none;
-  }
-}
-
-/* A shaded ball in the colour set by `--swatch` (see Swatch.tsx). */
-@utility swatch {
-  --swatch: var(--color-muted);
-  border-radius: 9999px;
-  background: radial-gradient(
-    circle at 35% 30%,
-    color-mix(in srgb, var(--swatch) 55%, white),
-    color-mix(in srgb, var(--swatch) 80%, black)
-  );
+  --color-page: #0d0d0d;
+  --color-surface: #141414;
+  --color-ink: #ededeb;
+  --color-muted: #8c8c88;
+  --color-faint: #5a5a57;
+  --color-line: #2a2a28;
+  --color-fill: #d9d9d6;
+  --color-danger: #ff8a80;
 }
 
 @layer base {
   :root {
-    color-scheme: light dark;
+    color-scheme: dark;
   }
 
   body {
     @apply min-h-screen bg-page font-sans text-ink antialiased;
+    font-feature-settings: 'ss01', 'cv11';
   }
 
   button:not(:disabled) {
@@ -62,6 +33,6 @@
   }
 
   :focus-visible {
-    @apply outline-2 outline-offset-2 outline-accent;
+    @apply outline-1 outline-offset-4 outline-ink;
   }
 }

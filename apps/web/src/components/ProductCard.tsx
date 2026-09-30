@@ -1,41 +1,72 @@
 import { MAX_QUANTITY, type Product } from '../api.ts'
-import { formatPrice } from '../format.ts'
-import { Swatch } from './Swatch.tsx'
+import { formatPrice, productTone } from '../format.ts'
+import { QuantityStepper } from './QuantityStepper.tsx'
 
 type Props = {
   product: Product
+  /** Position in the catalogue, shown as the palette number (1 → "01"). */
+  number: number
   quantityInBasket: number
   busy: boolean
-  onAdd: () => void
+  onSetQuantity: (quantity: number) => void
 }
 
 /**
- * A compact row on phones (swatch | name | price, button underneath), and a
- * vertical card from `sm` up.
+ * A colour-chip tile, like a page from a palette book: a block of the
+ * product's tone with its reference details, and a label strip below. Shows an
+ * Add button until the product is in the basket, then a −/+ stepper.
  */
-export function ProductCard({ product, quantityInBasket, busy, onAdd }: Props) {
+export function ProductCard({ product, number, quantityInBasket, busy, onSetQuantity }: Props) {
+  const tone = productTone(product.name)
+
   return (
-    <article className="grid grid-cols-[auto_minmax(0,1fr)_auto] gap-x-3.5 gap-y-2.5 rounded-xl border border-line bg-surface p-4 shadow-card sm:flex sm:flex-col sm:gap-3 sm:p-5">
-      <Swatch name={product.name} className="row-span-2" />
-      <div>
-        <h3 className="font-semibold">{product.name}</h3>
-        <span className="font-mono text-[0.8125rem] text-muted">{product.code}</span>
+    <article className="flex flex-col overflow-hidden bg-surface">
+      <div
+        className="relative flex aspect-square flex-col justify-between p-4 text-white/85 sm:p-5"
+        style={{ backgroundColor: tone }}
+      >
+        <div className="flex items-baseline justify-between text-[0.6875rem] tracking-wide">
+          <span className="tabular-nums">no. {String(number).padStart(2, '0')}</span>
+          <span>{product.code}</span>
+        </div>
+        <div className="flex items-end justify-between">
+          <span className="font-mono text-[0.6875rem] tracking-wider uppercase">{tone}</span>
+          {quantityInBasket > 0 && (
+            <span className="text-5xl leading-none font-medium tracking-tighter tabular-nums">
+              ×{quantityInBasket}
+            </span>
+          )}
+        </div>
       </div>
-      <p className="text-lg font-semibold tabular-nums sm:text-xl">{formatPrice(product.price)}</p>
-      <button
-        type="button"
-        className="col-span-2 rounded-lg bg-accent px-4 py-2.5 font-semibold text-on-accent transition-colors enabled:hover:bg-accent-hover disabled:opacity-50"
-        disabled={busy || quantityInBasket >= MAX_QUANTITY}
-        onClick={onAdd}
-      >
-        Add to basket
-      </button>
-      <p
-        className="col-span-2 col-start-2 -mt-1 text-[0.8125rem] text-muted empty:hidden sm:block sm:min-h-[1.5em] sm:text-center"
-        aria-live="polite"
-      >
-        {quantityInBasket > 0 ? `${quantityInBasket} in basket` : ''}
-      </p>
+
+      <div className="flex flex-col gap-4 border border-t-0 border-line p-4 sm:p-5">
+        <div className="flex items-baseline justify-between gap-4">
+          <h3 className="truncate text-2xl leading-tight font-medium tracking-tight lowercase">
+            {product.name}
+          </h3>
+          <p className="text-lg tabular-nums">{formatPrice(product.price)}</p>
+        </div>
+
+        {quantityInBasket === 0 ? (
+          <button
+            type="button"
+            className="h-10 w-full rounded-full border border-ink text-sm font-medium lowercase transition-colors enabled:hover:bg-ink enabled:hover:text-page disabled:opacity-40"
+            aria-label={`Add ${product.name} to basket`}
+            disabled={busy || quantityInBasket >= MAX_QUANTITY}
+            onClick={() => onSetQuantity(1)}
+          >
+            add
+          </button>
+        ) : (
+          <QuantityStepper
+            className="h-10 w-full"
+            label={product.name}
+            quantity={quantityInBasket}
+            disabled={busy}
+            onChange={onSetQuantity}
+          />
+        )}
+      </div>
     </article>
   )
 }

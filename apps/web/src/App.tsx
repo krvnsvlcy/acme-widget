@@ -4,7 +4,6 @@ import {
   type Product,
   getCart,
   listProducts,
-  removeFromCart,
   setCartQuantity,
 } from './api.ts'
 import { BasketPanel } from './components/BasketPanel.tsx'
@@ -49,54 +48,71 @@ function App() {
   const quantityOf = (code: string) =>
     cart?.items.find((line) => line.product.code === code)?.quantity ?? 0
 
+  const setQuantity = (code: string, quantity: number) =>
+    updateCart(code, () => setCartQuantity(code, quantity))
+
   return (
-    <div className="mx-auto max-w-[1080px] px-4 pt-6 pb-12 sm:px-6 sm:pt-10 sm:pb-16">
-      <header className="mb-8">
-        <h1 className="text-[1.75rem] font-bold tracking-tight">Acme Widget Co</h1>
-        <p className="text-muted">Sales system proof of concept</p>
-      </header>
+    // Full-viewport shell: the page never scrolls, each area scrolls on its own.
+    // Wide screens: main on the left, cart on the right. Phones: main on top,
+    // cart as a bottom panel.
+    <div className="grid h-dvh grid-rows-[minmax(0,1fr)_auto] overflow-hidden md:grid-cols-[minmax(0,1fr)_380px] md:grid-rows-none">
+      <main className="relative flex min-h-0 flex-col">
+        {/* One scrolling document, with the header stuck to its top. */}
+        <div className="min-h-0 flex-1 overflow-y-auto px-6 pb-10 md:px-12">
+          {/* Poster-style corner marks. Bleeds to the column edges so content scrolls under it. */}
+          <header className="sticky top-0 z-10 -mx-6 flex items-baseline justify-between bg-page px-6 pt-5 pb-3 md:-mx-12 md:px-12 md:pt-6">
+            <h1 className="text-lg font-semibold tracking-tight">
+              acme<span className="text-muted">.</span>
+            </h1>
+            <p className="text-[0.6875rem] text-muted">sales system — proof of concept</p>
+          </header>
 
-      {error && (
-        <p className="mb-6 rounded-xl bg-danger-bg px-4 py-3 text-danger" role="alert">
-          {error}
+          <div className="max-w-4xl">
+            {error && (
+              <p className="mt-4 border border-danger px-4 py-3 text-sm text-danger" role="alert">
+                {error}
+              </p>
+            )}
+
+            {products === null ? (
+              !error && <p className="mt-8 text-sm text-muted">loading…</p>
+            ) : (
+              <section aria-labelledby="products-title">
+                <div className="pt-8 pb-8 md:pt-14 md:pb-12">
+                  <h2
+                    id="products-title"
+                    className="text-6xl leading-[0.9] font-medium tracking-tighter md:text-8xl"
+                  >
+                    widgets
+                  </h2>
+                </div>
+                <ul className="grid gap-4 lg:grid-cols-2 lg:gap-6">
+                  {products.map((product, i) => (
+                    <li key={product.code}>
+                      <ProductCard
+                        product={product}
+                        number={i + 1}
+                        quantityInBasket={quantityOf(product.code)}
+                        busy={busyCode === product.code}
+                        onSetQuantity={(quantity) => setQuantity(product.code, quantity)}
+                      />
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+          </div>
+        </div>
+
+        <p
+          className="pointer-events-none absolute right-3 bottom-6 hidden text-[0.6875rem] text-faint [writing-mode:vertical-rl] md:block"
+          aria-hidden="true"
+        >
+          acmewidget.co
         </p>
-      )}
+      </main>
 
-      {products === null || cart === null ? (
-        !error && <p className="text-muted">Loading…</p>
-      ) : (
-        <main className="grid items-start gap-8 min-[860px]:grid-cols-[minmax(0,1fr)_380px]">
-          <section aria-labelledby="products-title">
-            <h2 id="products-title" className="mb-4 text-lg font-semibold">
-              Products
-            </h2>
-            <div className="grid gap-3 sm:grid-cols-[repeat(auto-fill,minmax(190px,1fr))] sm:gap-4">
-              {products.map((product) => (
-                <ProductCard
-                  key={product.code}
-                  product={product}
-                  quantityInBasket={quantityOf(product.code)}
-                  busy={busyCode === product.code}
-                  onAdd={() =>
-                    updateCart(product.code, () =>
-                      setCartQuantity(product.code, quantityOf(product.code) + 1),
-                    )
-                  }
-                />
-              ))}
-            </div>
-          </section>
-
-          <BasketPanel
-            cart={cart}
-            busyCode={busyCode}
-            onSetQuantity={(code, quantity) =>
-              updateCart(code, () => setCartQuantity(code, quantity))
-            }
-            onRemove={(code) => updateCart(code, () => removeFromCart(code))}
-          />
-        </main>
-      )}
+      <BasketPanel cart={cart} className="max-h-[45dvh] md:max-h-none" />
     </div>
   )
 }

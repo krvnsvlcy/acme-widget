@@ -1,96 +1,98 @@
 import type { Cart } from '../api.ts'
-import { formatPrice } from '../format.ts'
-import { QuantityStepper } from './QuantityStepper.tsx'
-import { Swatch } from './Swatch.tsx'
+import { formatPrice, productTone } from '../format.ts'
+import { Ring } from './Ring.tsx'
 
 type Props = {
-  cart: Cart
-  busyCode: string | null
-  onSetQuantity: (productCode: string, quantity: number) => void
-  onRemove: (productCode: string) => void
+  /** null while loading. */
+  cart: Cart | null
+  className?: string
 }
 
-export function BasketPanel({ cart, busyCode, onSetQuantity, onRemove }: Props) {
-  const itemCount = cart.items.reduce((count, line) => count + line.quantity, 0)
+/** Read-only basket: a scrollable list of lines with the totals pinned below. */
+export function BasketPanel({ cart, className = '' }: Props) {
+  const items = cart?.items ?? []
+  const itemCount = items.reduce((count, line) => count + line.quantity, 0)
 
   return (
     <aside
-      className="sticky top-6 rounded-xl border border-line bg-surface p-6 shadow-card"
+      className={`flex min-h-0 flex-col border-t border-line bg-surface md:border-t-0 md:border-l ${className}`}
       aria-labelledby="basket-title"
     >
-      <header className="flex items-baseline justify-between">
-        <h2 id="basket-title" className="text-lg font-semibold">
-          Basket
+      <header className="flex shrink-0 items-baseline justify-between px-6 pt-5 pb-2 md:px-8 md:pt-6">
+        <h2 id="basket-title" className="text-3xl font-medium tracking-tight lowercase md:text-4xl">
+          basket
         </h2>
-        <span className="text-muted">
+        <span className="text-xs text-muted tabular-nums">
           {itemCount} {itemCount === 1 ? 'item' : 'items'}
         </span>
       </header>
 
-      {cart.items.length === 0 ? (
-        <p className="pt-4 pb-6 text-muted">Your basket is empty.</p>
-      ) : (
-        <ul className="mt-2 mb-2">
-          {cart.items.map(({ product, quantity, lineCents }) => (
-            <li
-              key={product.code}
-              className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 border-b border-line py-3.5"
-            >
-              <Swatch name={product.name} size="sm" className="row-span-2 self-start" />
-              <div className="flex flex-col">
-                <span className="font-semibold">{product.name}</span>
-                <span className="text-[0.8125rem] text-muted">
-                  {formatPrice(product.price)} each
-                </span>
-              </div>
-              <button
-                type="button"
-                className="size-7 self-start justify-self-end rounded-full text-xl leading-none text-muted enabled:hover:bg-page enabled:hover:text-ink disabled:opacity-50"
-                aria-label={`Remove ${product.name} from basket`}
-                disabled={busyCode === product.code}
-                onClick={() => onRemove(product.code)}
-              >
-                ×
-              </button>
-              <QuantityStepper
-                className="justify-self-start"
-                label={product.name}
-                quantity={quantity}
-                disabled={busyCode === product.code}
-                onChange={(next) => onSetQuantity(product.code, next)}
-              />
-              <span className="justify-self-end font-semibold tabular-nums">
-                {formatPrice(lineCents)}
-              </span>
-            </li>
-          ))}
-        </ul>
-      )}
-
-      <dl className="mt-4 [&>div]:flex [&>div]:justify-between [&>div]:py-1 [&_dd]:tabular-nums">
-        <div className="text-muted">
-          <dt>Subtotal</dt>
-          <dd>{formatPrice(cart.subtotalCents)}</dd>
-        </div>
-        {cart.discountCents > 0 && (
-          <div className="text-positive">
-            <dt>Offers</dt>
-            <dd>−{formatPrice(cart.discountCents)}</dd>
+      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-6 md:px-8">
+        {cart === null ? (
+          <p className="py-4 text-sm text-muted">loading…</p>
+        ) : items.length === 0 ? (
+          // Fills the whole scroll area, centred both ways.
+          <div className="flex flex-1 flex-col items-center justify-center gap-4 py-6 text-center">
+            <Ring className="size-16" />
+            <div className="flex flex-col gap-1">
+              <p className="text-sm text-muted">Your basket is empty.</p>
+              <p className="max-w-60 text-xs text-balance text-faint">
+                Press <span className="text-muted">add</span> on any widget to put it in your
+                basket.
+              </p>
+            </div>
           </div>
+        ) : (
+          <ul>
+            {items.map(({ product, quantity, lineCents }) => (
+              <li
+                key={product.code}
+                className="flex items-center gap-3 border-b border-line py-4 last:border-b-0"
+              >
+                <Ring filled color={productTone(product.name)} className="size-5" />
+                <div className="flex min-w-0 flex-1 flex-col">
+                  <span className="truncate lowercase">{product.name}</span>
+                  <span className="text-xs text-muted tabular-nums">
+                    {quantity} × {formatPrice(product.price)}
+                  </span>
+                </div>
+                <span className="tabular-nums">{formatPrice(lineCents)}</span>
+              </li>
+            ))}
+          </ul>
         )}
-        <div className="text-muted">
-          <dt>Delivery</dt>
-          <dd>
-            {cart.items.length > 0 && cart.deliveryCents === 0
-              ? 'Free'
-              : formatPrice(cart.deliveryCents)}
-          </dd>
-        </div>
-        <div className="mt-2 border-t border-line pt-3 text-lg font-bold">
-          <dt>Total</dt>
-          <dd>{formatPrice(cart.totalCents)}</dd>
-        </div>
-      </dl>
+      </div>
+
+      {cart !== null && (
+        <footer className="shrink-0 border-t border-line px-6 pt-4 pb-5 md:px-8 md:pb-6">
+          <dl className="text-sm [&_dd]:tabular-nums [&>div]:flex [&>div]:justify-between [&>div]:py-0.5">
+            <div className="text-muted">
+              <dt>subtotal</dt>
+              <dd>{formatPrice(cart.subtotalCents)}</dd>
+            </div>
+            {cart.discountCents > 0 && (
+              <div className="text-ink">
+                <dt>offers</dt>
+                <dd>−{formatPrice(cart.discountCents)}</dd>
+              </div>
+            )}
+            <div className="text-muted">
+              <dt>delivery</dt>
+              <dd>
+                {items.length > 0 && cart.deliveryCents === 0
+                  ? 'free'
+                  : formatPrice(cart.deliveryCents)}
+              </dd>
+            </div>
+            <div className="mt-3 items-baseline border-t border-line pt-3">
+              <dt className="text-muted">total</dt>
+              <dd className="text-4xl font-medium tracking-tight md:text-5xl">
+                {formatPrice(cart.totalCents)}
+              </dd>
+            </div>
+          </dl>
+        </footer>
+      )}
     </aside>
   )
 }

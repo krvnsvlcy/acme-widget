@@ -5,15 +5,17 @@ type Props = {
   quantity: number
   disabled: boolean
   onChange: (quantity: number) => void
+  /** Sizing and placement; the buttons stretch to the height given here. */
   className?: string
 }
 
-const buttonClass = 'size-8 enabled:hover:bg-page disabled:opacity-50'
+const buttonClass =
+  'h-full w-10 shrink-0 text-lg transition-colors enabled:hover:bg-black/10 disabled:opacity-40'
 
 export function QuantityStepper({ label, quantity, disabled, onChange, className = '' }: Props) {
   return (
     <div
-      className={`inline-flex items-center overflow-hidden rounded-lg border border-line ${className}`}
+      className={`inline-flex items-center justify-between overflow-hidden rounded-full border border-ink bg-ink text-page ${className}`}
       role="group"
       aria-label={`Quantity of ${label}`}
     >
@@ -26,7 +28,7 @@ export function QuantityStepper({ label, quantity, disabled, onChange, className
       >
         −
       </button>
-      <output className="min-w-8 text-center tabular-nums" aria-live="polite">
+      <output className="min-w-8 text-center font-medium tabular-nums" aria-live="polite">
         {quantity}
       </output>
       <button
