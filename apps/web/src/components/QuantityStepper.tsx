@@ -1,9 +1,8 @@
-import { MAX_QUANTITY } from '../api.ts'
+import { MAX_QUANTITY } from '../libs/api.ts'
 
 type Props = {
   label: string
   quantity: number
-  disabled: boolean
   onChange: (quantity: number) => void
   /** Sizing and placement; the buttons stretch to the height given here. */
   className?: string
@@ -12,7 +11,7 @@ type Props = {
 const buttonClass =
   'h-full w-10 shrink-0 text-lg transition-colors enabled:hover:bg-black/10 disabled:opacity-40'
 
-export function QuantityStepper({ label, quantity, disabled, onChange, className = '' }: Props) {
+export function QuantityStepper({ label, quantity, onChange, className = '' }: Props) {
   return (
     <div
       className={`inline-flex items-center justify-between overflow-hidden rounded-full border border-ink bg-ink text-page ${className}`}
@@ -23,7 +22,6 @@ export function QuantityStepper({ label, quantity, disabled, onChange, className
         type="button"
         className={buttonClass}
         aria-label={`Remove one ${label}`}
-        disabled={disabled}
         onClick={() => onChange(quantity - 1)}
       >
         −
@@ -35,7 +33,7 @@ export function QuantityStepper({ label, quantity, disabled, onChange, className
         type="button"
         className={buttonClass}
         aria-label={`Add one ${label}`}
-        disabled={disabled || quantity >= MAX_QUANTITY}
+        disabled={quantity >= MAX_QUANTITY}
         onClick={() => onChange(quantity + 1)}
       >
         +

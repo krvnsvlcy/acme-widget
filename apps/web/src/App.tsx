@@ -1,55 +1,25 @@
-import { useEffect, useState } from 'react'
-import {
-  type Cart,
-  type Product,
-  getCart,
-  listProducts,
-  setCartQuantity,
-} from './api.ts'
+import { useEffect } from 'react'
+import { useStore } from './libs/store.ts'
 import { BasketPanel } from './components/BasketPanel.tsx'
-import { ProductCard } from './components/ProductCard.tsx'
+import { ProductList } from './components/ProductList.tsx'
+
+function ErrorAlert() {
+  const error = useStore((s) => s.productsError ?? s.cartError)
+  if (!error) return null
+
+  return (
+    <p className="mt-4 border border-danger px-4 py-3 text-sm text-danger" role="alert">
+      {error}
+    </p>
+  )
+}
 
 function App() {
-  const [products, setProducts] = useState<Product[] | null>(null)
-  const [cart, setCart] = useState<Cart | null>(null)
-  const [busyCode, setBusyCode] = useState<string | null>(null)
-  const [error, setError] = useState<string | null>(null)
+  const load = useStore((s) => s.load)
 
   useEffect(() => {
-    let cancelled = false
-
-    Promise.all([listProducts(), getCart()])
-      .then(([products, cart]) => {
-        if (!cancelled) {
-          setProducts(products)
-          setCart(cart)
-        }
-      })
-      .catch((e: Error) => !cancelled && setError(e.message))
-
-    return () => {
-      cancelled = true
-    }
-  }, [])
-
-  /** Runs a cart update for one product, showing that product as busy meanwhile. */
-  async function updateCart(productCode: string, update: () => Promise<Cart>) {
-    setBusyCode(productCode)
-    try {
-      setCart(await update())
-      setError(null)
-    } catch (e) {
-      setError((e as Error).message)
-    } finally {
-      setBusyCode(null)
-    }
-  }
-
-  const quantityOf = (code: string) =>
-    cart?.items.find((line) => line.product.code === code)?.quantity ?? 0
-
-  const setQuantity = (code: string, quantity: number) =>
-    updateCart(code, () => setCartQuantity(code, quantity))
+    load()
+  }, [load])
 
   return (
     // Full-viewport shell: the page never scrolls, each area scrolls on its own.
@@ -68,39 +38,8 @@ function App() {
           </header>
 
           <div className="max-w-4xl">
-            {error && (
-              <p className="mt-4 border border-danger px-4 py-3 text-sm text-danger" role="alert">
-                {error}
-              </p>
-            )}
-
-            {products === null ? (
-              !error && <p className="mt-8 text-sm text-muted">loading…</p>
-            ) : (
-              <section aria-labelledby="products-title">
-                <div className="pt-8 pb-8 md:pt-14 md:pb-12">
-                  <h2
-                    id="products-title"
-                    className="text-6xl leading-[0.9] font-medium tracking-tighter md:text-8xl"
-                  >
-                    widgets
-                  </h2>
-                </div>
-                <ul className="grid gap-4 lg:grid-cols-2 lg:gap-6">
-                  {products.map((product, i) => (
-                    <li key={product.code}>
-                      <ProductCard
-                        product={product}
-                        number={i + 1}
-                        quantityInBasket={quantityOf(product.code)}
-                        busy={busyCode === product.code}
-                        onSetQuantity={(quantity) => setQuantity(product.code, quantity)}
-                      />
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            )}
+            <ErrorAlert />
+            <ProductList />
           </div>
         </div>
 
@@ -112,7 +51,7 @@ function App() {
         </p>
       </main>
 
-      <BasketPanel cart={cart} className="max-h-[45dvh] md:max-h-none" />
+      <BasketPanel className="max-h-[45dvh] md:max-h-none" />
     </div>
   )
 }

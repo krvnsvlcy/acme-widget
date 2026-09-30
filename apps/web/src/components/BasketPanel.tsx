@@ -1,16 +1,36 @@
-import type { Cart } from '../api.ts'
+import { useStore } from '../libs/store.ts'
 import { formatPrice, productTone } from '../format.ts'
 import { Ring } from './Ring.tsx'
 
 type Props = {
-  /** null while loading. */
-  cart: Cart | null
   className?: string
 }
 
+/**
+ * Placeholder for a value that is still being calculated. It holds a non-breaking
+ * space, so it takes the line height of the text around it and never shifts the
+ * layout. The caller only sets the width.
+ */
+function Skeleton({ className }: { className: string }) {
+  return (
+    <span
+      className={`inline-block animate-pulse rounded-xl bg-muted/30 align-baseline ${className}`}
+      aria-hidden="true"
+    >
+      &nbsp;
+    </span>
+  )
+}
+
 /** Read-only basket: a scrollable list of lines with the totals pinned below. */
-export function BasketPanel({ cart, className = '' }: Props) {
-  const items = cart?.items ?? []
+export function BasketPanel({ className = '' }: Props) {
+  const cart = useStore((s) => s.cart)
+  const status = useStore((s) => s.cartStatus)
+  // Sorted by product code so the order is the same whether the lines came from
+  // an optimistic edit or from the server.
+  const items = (cart?.items ?? []).toSorted((a, b) => a.product.code.localeCompare(b.product.code))
+  // Totals come from the server, so until it confirms the latest edits they are not trustworthy.
+  const stale = status === 'loading' || status === 'saving'
   const itemCount = items.reduce((count, line) => count + line.quantity, 0)
 
   return (
@@ -29,7 +49,9 @@ export function BasketPanel({ cart, className = '' }: Props) {
 
       <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-6 md:px-8">
         {cart === null ? (
-          <p className="py-4 text-sm text-muted">loading…</p>
+          <p className="py-4 text-sm text-muted">
+            {status === 'loading' ? 'loading…' : 'basket unavailable'}
+          </p>
         ) : items.length === 0 ? (
           // Fills the whole scroll area, centred both ways.
           <div className="flex flex-1 flex-col items-center justify-center gap-4 py-6 text-center">
@@ -68,26 +90,32 @@ export function BasketPanel({ cart, className = '' }: Props) {
           <dl className="text-sm [&_dd]:tabular-nums [&>div]:flex [&>div]:justify-between [&>div]:py-0.5">
             <div className="text-muted">
               <dt>subtotal</dt>
-              <dd>{formatPrice(cart.subtotalCents)}</dd>
+              <dd>{stale ? <Skeleton className="w-14" /> : formatPrice(cart.subtotalCents)}</dd>
             </div>
             {cart.discountCents > 0 && (
               <div className="text-ink">
                 <dt>offers</dt>
-                <dd>−{formatPrice(cart.discountCents)}</dd>
+                <dd>
+                  {stale ? <Skeleton className="w-12" /> : `−${formatPrice(cart.discountCents)}`}
+                </dd>
               </div>
             )}
             <div className="text-muted">
               <dt>delivery</dt>
               <dd>
-                {items.length > 0 && cart.deliveryCents === 0
-                  ? 'free'
-                  : formatPrice(cart.deliveryCents)}
+                {stale ? (
+                  <Skeleton className="w-12" />
+                ) : items.length > 0 && cart.deliveryCents === 0 ? (
+                  'free'
+                ) : (
+                  formatPrice(cart.deliveryCents)
+                )}
               </dd>
             </div>
             <div className="mt-3 items-baseline border-t border-line pt-3">
               <dt className="text-muted">total</dt>
               <dd className="text-4xl font-medium tracking-tight md:text-5xl">
-                {formatPrice(cart.totalCents)}
+                {stale ? <Skeleton className="w-32" /> : formatPrice(cart.totalCents)}
               </dd>
             </div>
           </dl>

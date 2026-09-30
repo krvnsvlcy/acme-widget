@@ -39,7 +39,6 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export const listProducts = () => request<Product[]>('/api/products')
-
 export const getCart = () => request<Cart>('/api/cart')
 
 /** Sets the quantity of a product in the cart. 0 removes it. */
