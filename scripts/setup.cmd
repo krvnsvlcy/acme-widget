@@ -7,5 +7,5 @@ call composer install || exit /b 1
 popd
 
 pushd apps\web
-call pnpm install || exit /b 1
+call npm install || exit /b 1
 popd

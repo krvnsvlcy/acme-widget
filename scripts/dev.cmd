@@ -4,4 +4,4 @@ setlocal
 cd /d "%~dp0.."
 
 start "api" /d apps\api php -S localhost:8000 -t public
-start "web" /d apps\web cmd /c pnpm dev
+start "web" /d apps\web cmd /c npm run dev

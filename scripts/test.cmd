@@ -7,5 +7,5 @@ call composer test || exit /b 1
 popd
 
 pushd apps\web
-call pnpm typecheck || exit /b 1
+call npm run typecheck || exit /b 1
 popd

@@ -6,5 +6,5 @@ cd "$(dirname "$0")/.."
 trap 'kill 0' EXIT
 
 (cd apps/api && php -S localhost:8000 -t public) &
-(cd apps/web && pnpm dev) &
+(cd apps/web && npm run dev) &
 wait

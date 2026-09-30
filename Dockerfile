@@ -3,12 +3,11 @@
 
 # --- 1. Build the SPA -------------------------------------------------------
 FROM node:24-alpine AS web
-RUN npm install -g pnpm@12.4.2
 WORKDIR /app/apps/web
-COPY apps/web/package.json apps/web/pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile
+COPY apps/web/package.json apps/web/package-lock.json ./
+RUN npm ci
 COPY apps/web/ ./
-RUN pnpm build
+RUN npm run build
 
 # --- 2. PHP dependencies (no dev packages) ----------------------------------
 FROM composer:2 AS vendor
