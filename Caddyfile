@@ -1,0 +1,35 @@
+# Production server config for FrankenPHP (Caddy + PHP in one process).
+#
+# One origin serves both apps:
+#   /api/*        -> the PHP front controller (apps/api/public/index.php)
+#   static files  -> the built React SPA (copied into the same public dir)
+#   anything else -> the SPA's index.html, so client-side routes work
+{
+	# Railway terminates TLS in front of the container: serve plain HTTP.
+	auto_https off
+	admin off
+	frankenphp
+}
+
+:{$PORT:8080} {
+	root * {$DOCUMENT_ROOT:/app/public}
+	encode zstd gzip
+
+	handle /api/* {
+		rewrite * /index.php
+		php
+	}
+
+	# Never serve PHP source as a static file.
+	@php path *.php
+	handle @php {
+		respond 404
+	}
+
+	handle {
+		# Vite fingerprints everything under /assets, so it can be cached forever.
+		header /assets/* Cache-Control "public, max-age=31536000, immutable"
+		try_files {path} /index.html
+		file_server
+	}
+}

@@ -1,0 +1,14 @@
+.git
+**/node_modules
+**/vendor
+**/dist
+**/.vite
+apps/api/var
+**/.phpunit.cache
+**/.phpunit.result.cache
+**/.env
+**/.env.*
+**/*.log
+**/.DS_Store
+.idea
+.vscode

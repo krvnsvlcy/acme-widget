@@ -17,6 +17,26 @@ scripts/test.sh    # PHPUnit + web typecheck
 
 Windows: use the matching `scripts\*.cmd` files.
 
+## Deployment (Railway)
+
+The repo deploys as a single Docker service. The [Dockerfile](Dockerfile)
+builds the SPA, installs the PHP dependencies without dev packages, and copies
+the built SPA into the API's `public/` directory. [FrankenPHP](https://frankenphp.dev)
+(Caddy + PHP) then serves everything from one origin, as configured in the
+[Caddyfile](Caddyfile):
+
+- `/api/*` goes to the PHP front controller.
+- Static files (JS, CSS, favicon) are served directly. Everything else falls
+  back to `index.html`, so the SPA handles its own routes.
+
+To deploy, create a Railway service from this repo. [railway.json](railway.json)
+selects the Dockerfile and health-checks `/api/products`. Railway provides
+`PORT`; no other variables are needed.
+
+The SQLite database is stored in `/app/var`, which is wiped on every deploy
+unless you attach a Railway volume mounted at `/app/var`. The catalogue and
+charge rules are re-seeded automatically either way; only carts are lost.
+
 ## How it works
 
 `Basket` (`apps/api/src/Domain/Basket.php`) is initialised with a `Catalog`
