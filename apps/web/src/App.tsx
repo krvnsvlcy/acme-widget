@@ -9,7 +9,6 @@ import {
 } from './api.ts'
 import { BasketPanel } from './components/BasketPanel.tsx'
 import { ProductCard } from './components/ProductCard.tsx'
-import './App.css'
 
 function App() {
   const [products, setProducts] = useState<Product[] | null>(null)
@@ -51,25 +50,27 @@ function App() {
     cart?.items.find((line) => line.product.code === code)?.quantity ?? 0
 
   return (
-    <div className="page">
-      <header className="page__header">
-        <h1>Acme Widget Co</h1>
-        <p>Sales system proof of concept</p>
+    <div className="mx-auto max-w-[1080px] px-4 pt-6 pb-12 sm:px-6 sm:pt-10 sm:pb-16">
+      <header className="mb-8">
+        <h1 className="text-[1.75rem] font-bold tracking-tight">Acme Widget Co</h1>
+        <p className="text-muted">Sales system proof of concept</p>
       </header>
 
       {error && (
-        <p className="alert" role="alert">
+        <p className="mb-6 rounded-xl bg-danger-bg px-4 py-3 text-danger" role="alert">
           {error}
         </p>
       )}
 
       {products === null || cart === null ? (
-        !error && <p className="loading">Loading…</p>
+        !error && <p className="text-muted">Loading…</p>
       ) : (
-        <main className="layout">
+        <main className="grid items-start gap-8 min-[860px]:grid-cols-[minmax(0,1fr)_380px]">
           <section aria-labelledby="products-title">
-            <h2 id="products-title">Products</h2>
-            <div className="products">
+            <h2 id="products-title" className="mb-4 text-lg font-semibold">
+              Products
+            </h2>
+            <div className="grid gap-3 sm:grid-cols-[repeat(auto-fill,minmax(190px,1fr))] sm:gap-4">
               {products.map((product) => (
                 <ProductCard
                   key={product.code}

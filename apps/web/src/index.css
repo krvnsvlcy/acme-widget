@@ -1,76 +1,67 @@
-:root {
-  --bg: #f6f5f2;
-  --surface: #ffffff;
-  --text: #1c1b1f;
-  --text-muted: #6b6873;
-  --border: #e4e2dd;
-  --accent: #2f5bd3;
-  --accent-hover: #2449b3;
-  --accent-text: #ffffff;
-  --positive: #1d7a46;
-  --danger: #b3261e;
-  --danger-bg: #fdecea;
-  --shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 4px 12px rgb(0 0 0 / 0.04);
-  --radius: 12px;
+@import 'tailwindcss';
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, 'SF Mono', Consolas, monospace;
+/*
+ * Semantic colours, used as e.g. `bg-surface`, `text-muted`, `border-line`.
+ * Dark mode overrides the same variables, so components need no `dark:` variants.
+ */
+@theme {
+  --color-page: #f6f5f2;
+  --color-surface: #ffffff;
+  --color-ink: #1c1b1f;
+  --color-muted: #6b6873;
+  --color-line: #e4e2dd;
+  --color-accent: #2f5bd3;
+  --color-accent-hover: #2449b3;
+  --color-on-accent: #ffffff;
+  --color-positive: #1d7a46;
+  --color-danger: #b3261e;
+  --color-danger-bg: #fdecea;
 
-  color-scheme: light dark;
-  font: 16px/1.5 var(--sans);
-  color: var(--text);
-  background: var(--bg);
-  -webkit-font-smoothing: antialiased;
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.04), 0 4px 12px rgb(0 0 0 / 0.04);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #141418;
-    --surface: #1d1d23;
-    --text: #ececf0;
-    --text-muted: #9a98a3;
-    --border: #2e2e36;
-    --accent: #6f93f5;
-    --accent-hover: #8aa8f7;
-    --accent-text: #0e1320;
-    --positive: #5fcf8e;
-    --danger: #f2b8b5;
-    --danger-bg: #3a1d1b;
-    --shadow: none;
+    --color-page: #141418;
+    --color-surface: #1d1d23;
+    --color-ink: #ececf0;
+    --color-muted: #9a98a3;
+    --color-line: #2e2e36;
+    --color-accent: #6f93f5;
+    --color-accent-hover: #8aa8f7;
+    --color-on-accent: #0e1320;
+    --color-positive: #5fcf8e;
+    --color-danger: #f2b8b5;
+    --color-danger-bg: #3a1d1b;
+    --shadow-card: none;
   }
 }
 
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
+/* A shaded ball in the colour set by `--swatch` (see Swatch.tsx). */
+@utility swatch {
+  --swatch: var(--color-muted);
+  border-radius: 9999px;
+  background: radial-gradient(
+    circle at 35% 30%,
+    color-mix(in srgb, var(--swatch) 55%, white),
+    color-mix(in srgb, var(--swatch) 80%, black)
+  );
 }
 
-body {
-  margin: 0;
-  min-height: 100vh;
-  background: var(--bg);
-}
+@layer base {
+  :root {
+    color-scheme: light dark;
+  }
 
-h1,
-h2,
-h3,
-p {
-  margin: 0;
-}
+  body {
+    @apply min-h-screen bg-page font-sans text-ink antialiased;
+  }
 
-button {
-  font: inherit;
-  color: inherit;
-  cursor: pointer;
-}
+  button:not(:disabled) {
+    @apply cursor-pointer;
+  }
 
-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
-}
-
-:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-accent;
+  }
 }
