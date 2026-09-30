@@ -26,7 +26,7 @@ final class CartController
     }
 
     /** Body: {"quantity": int}. Quantity 0 removes the item. */
-    public function updateItem(string $widgetId): void
+    public function updateItem(string $productCode): void
     {
         $body = json_decode(file_get_contents('php://input') ?: 'null', true);
         $quantity = is_array($body) ? ($body['quantity'] ?? null) : null;
@@ -35,8 +35,8 @@ final class CartController
             Response::error('quantity must be an integer between 0 and ' . self::MAX_QUANTITY, 422);
             return;
         }
-        if ($this->database->getProduct($widgetId) === null) {
-            Response::error("Unknown widget: {$widgetId}", 404);
+        if ($this->database->getProduct($productCode) === null) {
+            Response::error("Unknown product: {$productCode}", 404);
             return;
         }
 
@@ -44,18 +44,18 @@ final class CartController
         $cart = $this->database->getCart($ownerRef) ?? $this->database->createCart($ownerRef);
 
         $quantity === 0
-            ? $this->database->removeCartItem($cart->id, $widgetId)
-            : $this->database->upsertCartItem($cart->id, $widgetId, $quantity);
+            ? $this->database->removeCartItem($cart->id, $productCode)
+            : $this->database->upsertCartItem($cart->id, $productCode, $quantity);
 
         $this->respondWithCart($cart);
     }
 
-    public function removeItem(string $widgetId): void
+    public function removeItem(string $productCode): void
     {
         $cart = $this->database->getCart(self::ownerRef());
 
         if ($cart !== null) {
-            $this->database->removeCartItem($cart->id, $widgetId);
+            $this->database->removeCartItem($cart->id, $productCode);
         }
 
         $this->respondWithCart($cart);
@@ -71,7 +71,7 @@ final class CartController
             $product = $this->catalog->getProduct($item->productCode);
             $basket->set($item->productCode, $item->quantity);
             $lines[] = [
-                'widget' => WidgetController::present($product),
+                'product' => ProductController::present($product),
                 'quantity' => $item->quantity,
                 'lineCents' => $product->price * $item->quantity,
             ];

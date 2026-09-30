@@ -40,12 +40,12 @@ Both start empty. `Seed::run($database)` fills in the catalogue and charge
 rules, and is safe to run again: products and rules are both matched by
 code. The server runs it on every request.
 
-API (the cart is tied to a PHP session cookie; `widgetId` is the product code):
+API (the cart is tied to a PHP session cookie; `productCode` is e.g. R01):
 
 ```
-GET    /api/widgets            GET  /api/widgets/{widgetId}
-GET    /api/cart               PUT  /api/cart/items/{widgetId}   {"quantity": 0-99}
-DELETE /api/cart/items/{widgetId}
+GET    /api/products           GET  /api/products/{productCode}
+GET    /api/cart               PUT  /api/cart/items/{productCode}   {"quantity": 0-99}
+DELETE /api/cart/items/{productCode}
 ```
 
 ## Assumptions
