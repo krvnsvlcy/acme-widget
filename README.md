@@ -22,7 +22,9 @@ Windows: use the matching `scripts\*.cmd` files.
 `Basket` (`apps/api/src/Domain/Basket.php`) is initialised with a `Catalog`
 (products and charge rules), `set($code, $quantity)` sets a product's quantity
 (0 removes it), and `computeTotal()` returns the breakdown in cents
-(subtotal, discount, delivery, total).
+(subtotal, discount, delivery, total). The interface required by the brief is
+also there as written: `add($code)` adds one unit and `total()` returns the
+total in cents. Both are thin wrappers over `set()` and `computeTotal()`.
 
 Pricing is data-driven: each `ChargeRule` names a behaviour and carries its
 parameters. Rules run lowest `precedence` first (ties by `id`), and later rules

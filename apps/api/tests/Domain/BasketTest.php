@@ -35,6 +35,22 @@ final class BasketTest extends TestCase
         $this->assertSame($expected, $this->basketWith($codes)->computeTotal()->total);
     }
 
+    /**
+     * The brief's interface, used literally: add() one code at a time, then total().
+     *
+     * @param list<string> $codes
+     */
+    #[DataProvider('examples')]
+    public function testSpecInterfaceAddAndTotal(array $codes, int $expected): void
+    {
+        $basket = new Basket(new Catalog($this->seededDatabase()));
+        foreach ($codes as $code) {
+            $basket->add($code);
+        }
+
+        $this->assertSame($expected, $basket->total());
+    }
+
     /** @return array<string, array{int, int}> subtotal => expected delivery */
     public static function deliveryBoundaries(): array
     {

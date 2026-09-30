@@ -236,6 +236,32 @@ final class Basket
 
         return $matches ? $charge : null;
     }
+
+    /*
+     * Assessment interface.
+     *
+     * The brief requires the basket to have "an add method that takes the
+     * product code as a parameter" and "a total method that returns the total
+     * cost of the basket". These two methods provide that interface literally.
+     * They are thin wrappers over set() and computeTotal(), which the rest of
+     * the application uses.
+     */
+
+    /** Adds one unit of the product. */
+    public function add(string $productCode): void
+    {
+        $this->set($productCode, ($this->items[$productCode] ?? 0) + 1);
+    }
+
+    /**
+     * Total cost in cents, including offers and delivery.
+     *
+     * @throws Exceptions\ProductNotFoundException
+     */
+    public function total(): int
+    {
+        return $this->computeTotal()->total;
+    }
 }
 
 /** Basket price breakdown. All amounts are in cents. */
