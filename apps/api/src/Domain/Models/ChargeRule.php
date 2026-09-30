@@ -17,6 +17,9 @@ namespace Acme\Widget\Domain\Models;
  *
  * See docs/charge-rules.md for each rule's `data` and the calculation order.
  *
+ * `code` is a unique, stable business key (e.g. `delivery_under_50`). It
+ * identifies the rule when upserting, so callers never need the generated `id`.
+ *
  * `label` and `name` are optional business-facing metadata and must not
  * affect calculation behavior.
  *
@@ -29,6 +32,7 @@ final readonly class ChargeRule
 {
     public function __construct(
         public string $id,
+        public string $code,
         public string $rule,
         public array $data,
         public int $precedence = 0,
