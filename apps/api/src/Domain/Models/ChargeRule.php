@@ -11,14 +11,17 @@ namespace Acme\Widget\Domain\Models;
  * logic. Basket interprets the value of `$rule` and uses `$data` as the
  * parameters required by that rule.
  *
- * Examples of rule names:
+ * Rule names:
  * - product_discount_by_quantity
- * - delivery_discount_by_subtotal
+ * - delivery_price_by_subtotal
+ *
+ * See docs/charge-rules.md for each rule's `data` and the calculation order.
  *
  * `label` and `name` are optional business-facing metadata and must not
  * affect calculation behavior.
  *
- * `priority` controls the order in which applicable rules are evaluated.
+ * `precedence` controls the order in which active rules are applied: lowest
+ * first, ties broken by `id` ascending. Later rules may override earlier ones.
  *
  * `startsAt` and `endsAt` optionally restrict when a rule is active.
  */
@@ -28,7 +31,7 @@ final readonly class ChargeRule
         public string $id,
         public string $rule,
         public array $data,
-        public int $priority = 0,
+        public int $precedence = 0,
         public ?string $label = null,
         public ?string $name = null,
         public ?string $startsAt = null,
